@@ -68,8 +68,8 @@ export default function Dashboard() {
 
       {/* Gainers/Losers + Sectors */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <GainersLosersTable title="Top Gainers" data={gainers} type="gainers" />
-        <GainersLosersTable title="Top Losers" data={losers} type="losers" />
+        <GainersLosersTable title="Top Gainers" data={gainers} />
+        <GainersLosersTable title="Top Losers" data={losers} />
         <SectorHeatmap sectors={sectors} />
       </div>
     </div>

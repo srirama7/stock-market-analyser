@@ -6,12 +6,12 @@ import {
 import { usePriceSubscription } from '../hooks/useWebSocket';
 import { useMarketStore } from '../store/marketStore';
 import {
-  formatCurrency, formatPercent, formatNumber, getChangeColor, getChangeBg
+  formatCurrency, formatPercent, getChangeColor,
 } from '../utils/formatters';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { SECTOR_COLORS } from '../utils/constants';
 import { Plus, Trash2 } from 'lucide-react';
-import type { Portfolio as PortfolioType, PortfolioSummary, Holding } from '../types';
+import type { Portfolio as PortfolioType, PortfolioSummary } from '../types';
 
 export default function Portfolio() {
   const [portfolio, setPortfolio] = useState<PortfolioType | null>(null);

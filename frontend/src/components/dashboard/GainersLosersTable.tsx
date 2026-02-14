@@ -5,10 +5,9 @@ import { formatCurrency, formatPercent, getChangeColor } from '../../utils/forma
 interface Props {
   title: string;
   data: GainerLoser[];
-  type: 'gainers' | 'losers';
 }
 
-export default function GainersLosersTable({ title, data, type }: Props) {
+export default function GainersLosersTable({ title, data }: Props) {
   const navigate = useNavigate();
 
   return (
