@@ -1,0 +1,46 @@
+appId: com.stockanalyzer.ai
+productName: StockAnalyzer AI
+copyright: Copyright © 2025 StockAnalyzer AI
+
+directories:
+  output: release
+  buildResources: public
+
+files:
+  - dist/**/*
+  - electron/**/*
+  - package.json
+
+win:
+  target:
+    - target: appx
+      arch:
+        - x64
+    - target: nsis
+      arch:
+        - x64
+  artifactName: "${productName}-${version}-${arch}.${ext}"
+
+appx:
+  applicationId: StockAnalyzerAI
+  identityName: StockAnalyzerAI
+  publisher: "CN=StockAnalyzer"
+  publisherDisplayName: "StockAnalyzer AI"
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: true
+  shortcutName: StockAnalyzer AI
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+
+linux:
+  target:
+    - AppImage
+    - deb

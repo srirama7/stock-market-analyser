@@ -29,26 +29,25 @@ export default function CandlestickChart({ candles, indicators, height = 500 }: 
       width: containerRef.current.clientWidth,
       height,
       layout: {
-        background: { type: ColorType.Solid, color: '#0f172a' },
-        textColor: '#94a3b8',
-        fontSize: 12,
+        background: { type: ColorType.Solid, color: '#060a14' },
+        textColor: '#64748b',
+        fontSize: 11,
       },
       grid: {
-        vertLines: { color: '#1e293b' },
-        horzLines: { color: '#1e293b' },
+        vertLines: { color: 'rgba(30, 41, 59, 0.4)' },
+        horzLines: { color: 'rgba(30, 41, 59, 0.4)' },
       },
       crosshair: {
         mode: 0,
         vertLine: { color: '#475569', width: 1, style: 2 },
         horzLine: { color: '#475569', width: 1, style: 2 },
       },
-      rightPriceScale: { borderColor: '#334155' },
-      timeScale: { borderColor: '#334155', timeVisible: true },
+      rightPriceScale: { borderColor: 'rgba(51, 65, 85, 0.4)' },
+      timeScale: { borderColor: 'rgba(51, 65, 85, 0.4)', timeVisible: true },
     });
 
     chartRef.current = chart;
 
-    // Candlestick series
     const candleSeries = chart.addSeries(CandlestickSeries, {
       upColor: '#22c55e',
       downColor: '#ef4444',
@@ -65,7 +64,6 @@ export default function CandlestickChart({ candles, indicators, height = 500 }: 
       }))
     );
 
-    // Volume
     const volumeSeries = chart.addSeries(HistogramSeries, {
       priceFormat: { type: 'volume' },
       priceScaleId: 'volume',
@@ -77,11 +75,10 @@ export default function CandlestickChart({ candles, indicators, height = 500 }: 
       candles.map(c => ({
         time: c.time as unknown as TimeVal,
         value: c.volume,
-        color: c.close >= c.open ? '#22c55e40' : '#ef444440',
+        color: c.close >= c.open ? '#22c55e30' : '#ef444430',
       }))
     );
 
-    // Indicators
     if (indicators) {
       const lineColors: Record<string, string> = {
         sma20: '#f59e0b', sma50: '#3b82f6', sma200: '#8b5cf6',
@@ -132,7 +129,7 @@ export default function CandlestickChart({ candles, indicators, height = 500 }: 
               const s = chart.addSeries(HistogramSeries, { priceScaleId: 'macd' });
               s.setData(obj.histogram.filter(d => d.value !== null).map(d => ({
                 time: d.time as unknown as TimeVal, value: d.value!,
-                color: d.value! >= 0 ? '#22c55e80' : '#ef444480',
+                color: d.value! >= 0 ? '#22c55e60' : '#ef444460',
               })));
             }
           }
@@ -149,5 +146,5 @@ export default function CandlestickChart({ candles, indicators, height = 500 }: 
     return () => { window.removeEventListener('resize', handleResize); chart.remove(); chartRef.current = null; };
   }, [candles, indicators, height]);
 
-  return <div ref={containerRef} className="rounded-lg overflow-hidden" />;
+  return <div ref={containerRef} className="rounded-xl overflow-hidden ring-1 ring-slate-700/30" />;
 }

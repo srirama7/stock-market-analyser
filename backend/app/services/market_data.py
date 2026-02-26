@@ -11,7 +11,10 @@ from concurrent.futures import ThreadPoolExecutor
 from app.utils.nse_symbols import (
     get_yfinance_symbol, NIFTY_50_SYMBOLS, INDEX_SYMBOLS, SYMBOL_SECTOR
 )
-from app.utils.cache import quote_cache, history_cache, info_cache
+from app.utils.cache import (
+    quote_cache, history_cache, info_cache,
+    index_cache, gainers_losers_cache, breadth_cache, sectors_cache
+)
 
 logger = logging.getLogger(__name__)
 executor = ThreadPoolExecutor(max_workers=4)
@@ -250,9 +253,23 @@ def _fetch_index_data() -> List[Dict[str, Any]]:
 
 
 async def get_index_data() -> List[Dict[str, Any]]:
-    """Get index data."""
+    """Get index data with fallback cache."""
+    cached = index_cache.get("indices")
+    if cached:
+        return cached
+
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(executor, _fetch_index_data)
+    result = await loop.run_in_executor(executor, _fetch_index_data)
+    if result:
+        index_cache.set("indices", result, ttl=30)
+        return result
+
+    # Fallback to stale data
+    stale = index_cache.get_stale("indices")
+    if stale:
+        logger.info("Using stale index data as fallback")
+        return stale
+    return []
 
 
 def _fetch_gainers_losers(count: int = 5) -> Dict[str, List[Dict]]:
@@ -266,6 +283,21 @@ def _fetch_gainers_losers(count: int = 5) -> Dict[str, List[Dict]]:
 
 
 async def get_gainers_losers(count: int = 5) -> Dict[str, List[Dict]]:
-    """Get top gainers and losers."""
+    """Get top gainers and losers with fallback cache."""
+    cache_key = f"gl:{count}"
+    cached = gainers_losers_cache.get(cache_key)
+    if cached:
+        return cached
+
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(executor, _fetch_gainers_losers, count)
+    result = await loop.run_in_executor(executor, _fetch_gainers_losers, count)
+    if result and (result.get("gainers") or result.get("losers")):
+        gainers_losers_cache.set(cache_key, result, ttl=30)
+        return result
+
+    # Fallback to stale data
+    stale = gainers_losers_cache.get_stale(cache_key)
+    if stale:
+        logger.info("Using stale gainers/losers data as fallback")
+        return stale
+    return {"gainers": [], "losers": []}

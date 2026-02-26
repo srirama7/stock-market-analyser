@@ -5,6 +5,7 @@ import IndexCard from '../components/dashboard/IndexCard';
 import MarketBreadthBar from '../components/dashboard/MarketBreadthBar';
 import GainersLosersTable from '../components/dashboard/GainersLosersTable';
 import SectorHeatmap from '../components/dashboard/SectorHeatmap';
+import SkeletonLoader from '../components/ui/SkeletonLoader';
 import type { MarketBreadth, GainerLoser, SectorPerformance, IndexData } from '../types';
 
 export default function Dashboard() {
@@ -46,20 +47,29 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-slate-400">Loading market data...</div>
+      <div className="space-y-4">
+        <div className="skeleton h-8 w-48 rounded-lg" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+          <SkeletonLoader variant="card" count={5} />
+        </div>
+        <SkeletonLoader variant="card" count={1} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <SkeletonLoader variant="card" count={3} />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold text-slate-100">Market Overview</h1>
+      <h1 className="text-xl sm:text-2xl font-bold gradient-text animate-fade-in-up">
+        Market Overview
+      </h1>
 
       {/* Index Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-        {indices.map((idx) => (
-          <IndexCard key={idx.name} index={idx} />
+        {indices.map((idx, i) => (
+          <IndexCard key={idx.name} index={idx} delay={i * 60} />
         ))}
       </div>
 
@@ -68,8 +78,8 @@ export default function Dashboard() {
 
       {/* Gainers/Losers + Sectors */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <GainersLosersTable title="Top Gainers" data={gainers} />
-        <GainersLosersTable title="Top Losers" data={losers} />
+        <GainersLosersTable title="Top Gainers" data={gainers} type="gainer" />
+        <GainersLosersTable title="Top Losers" data={losers} type="loser" />
         <SectorHeatmap sectors={sectors} />
       </div>
     </div>

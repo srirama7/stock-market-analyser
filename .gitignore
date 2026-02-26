@@ -26,3 +26,6 @@ Thumbs.db
 
 # Windows artifacts
 nul
+
+# Electron release builds
+frontend/release/

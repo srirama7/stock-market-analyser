@@ -1,5 +1,10 @@
 type MessageHandler = (data: unknown) => void;
 
+function isElectron(): boolean {
+  return typeof window !== 'undefined' &&
+    typeof (window as unknown as Record<string, unknown>).electronAPI !== 'undefined';
+}
+
 export class WebSocketClient {
   private ws: WebSocket | null = null;
   private url: string;
@@ -16,8 +21,14 @@ export class WebSocketClient {
   connect() {
     if (this.ws?.readyState === WebSocket.OPEN) return;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}${this.url}`;
+    let wsUrl: string;
+    if (isElectron() || typeof (window as unknown as Record<string, unknown>).Capacitor !== 'undefined') {
+      // Desktop (Electron) or native app - connect directly to backend
+      wsUrl = `ws://localhost:8000${this.url}`;
+    } else {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      wsUrl = `${protocol}//${window.location.host}${this.url}`;
+    }
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {

@@ -1,6 +1,24 @@
 import axios from 'axios';
 
-const API_BASE = '/api';
+function isElectron(): boolean {
+  return typeof window !== 'undefined' &&
+    typeof (window as unknown as Record<string, unknown>).electronAPI !== 'undefined';
+}
+
+function getApiBase(): string {
+  // Electron desktop app
+  if (isElectron()) {
+    return 'http://localhost:8000/api';
+  }
+  // Capacitor native app
+  if (typeof (window as unknown as Record<string, unknown>).Capacitor !== 'undefined') {
+    return 'http://localhost:8000/api';
+  }
+  // Browser dev mode - Vite proxy handles /api
+  return '/api';
+}
+
+const API_BASE = getApiBase();
 
 const api = axios.create({
   baseURL: API_BASE,

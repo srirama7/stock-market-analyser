@@ -7,6 +7,9 @@ import { useMarketStore } from '../store/marketStore';
 import CandlestickChart from '../components/chart/CandlestickChart';
 import ChartToolbar from '../components/chart/ChartToolbar';
 import PatternOverlay from '../components/chart/PatternOverlay';
+import GlassCard from '../components/ui/GlassCard';
+import AnimatedNumber from '../components/ui/AnimatedNumber';
+import SkeletonLoader from '../components/ui/SkeletonLoader';
 import { formatCurrency, formatPercent, formatNumber, formatLargeNumber, getChangeColor } from '../utils/formatters';
 import type { Candle, PatternDetection, StockQuote } from '../types';
 
@@ -55,49 +58,62 @@ export default function ChartView() {
   const displayPrice = livePrice?.last_price || quote?.last_price || 0;
   const displayChange = livePrice?.day_change ?? quote?.day_change ?? 0;
   const displayChangePct = livePrice?.day_change_pct ?? quote?.day_change_pct ?? 0;
+  const isPositive = displayChange >= 0;
 
   return (
     <div className="space-y-3">
       {/* Stock Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-slate-100">{symbol}</h1>
-          <span className="text-sm text-slate-400">{quote?.name || symbol}</span>
-        </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold text-slate-100">
-            {formatCurrency(displayPrice)}
+      <GlassCard accent={isPositive ? 'green' : 'red'} className="p-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-100">{symbol}</h1>
+            <span className="text-sm text-slate-400">{quote?.name || symbol}</span>
           </div>
-          <div className={`text-sm font-medium ${getChangeColor(displayChange)}`}>
-            {displayChange >= 0 ? '+' : ''}{formatNumber(displayChange)} ({formatPercent(displayChangePct)})
+          <div className="text-right">
+            <div className="text-3xl sm:text-4xl font-black text-slate-100">
+              <AnimatedNumber value={displayPrice} format={(n) => formatCurrency(n)} />
+            </div>
+            <div className={`text-sm font-semibold mt-0.5 ${getChangeColor(displayChange)}`}>
+              {isPositive ? '+' : ''}{formatNumber(displayChange)} ({formatPercent(displayChangePct)})
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Quote Details */}
-      {quote && (
-        <div className="flex gap-4 text-xs text-slate-400 flex-wrap">
-          <span>Open: {formatCurrency(quote.open)}</span>
-          <span>High: {formatCurrency(quote.high)}</span>
-          <span>Low: {formatCurrency(quote.low)}</span>
-          <span>Vol: {formatLargeNumber(quote.volume)}</span>
-          {quote.week_52_high && <span>52W H: {formatCurrency(quote.week_52_high)}</span>}
-          {quote.week_52_low && <span>52W L: {formatCurrency(quote.week_52_low)}</span>}
-        </div>
-      )}
+        {/* Quote Details as pill badges */}
+        {quote && (
+          <div className="flex gap-2 mt-3 flex-wrap">
+            {[
+              { label: 'Open', value: formatCurrency(quote.open) },
+              { label: 'High', value: formatCurrency(quote.high) },
+              { label: 'Low', value: formatCurrency(quote.low) },
+              { label: 'Vol', value: formatLargeNumber(quote.volume) },
+              ...(quote.week_52_high ? [{ label: '52W H', value: formatCurrency(quote.week_52_high) }] : []),
+              ...(quote.week_52_low ? [{ label: '52W L', value: formatCurrency(quote.week_52_low) }] : []),
+            ].map((item) => (
+              <span
+                key={item.label}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/60 border border-slate-700/30 text-xs"
+              >
+                <span className="text-slate-500">{item.label}</span>
+                <span className="text-slate-300 font-medium">{item.value}</span>
+              </span>
+            ))}
+          </div>
+        )}
+      </GlassCard>
 
       {/* Toolbar */}
       <ChartToolbar />
 
       {/* Chart */}
       {loading ? (
-        <div className="flex items-center justify-center h-96 bg-slate-800 rounded-xl">
-          <span className="text-slate-400">Loading chart...</span>
-        </div>
+        <SkeletonLoader variant="chart" />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="lg:col-span-3">
-            <CandlestickChart candles={candles} indicators={indicators} height={500} />
+            <div className="glass-card p-1 overflow-hidden">
+              <CandlestickChart candles={candles} indicators={indicators} height={500} />
+            </div>
           </div>
           <div>
             <PatternOverlay patterns={patterns} />
